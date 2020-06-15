@@ -1,8 +1,7 @@
 package com.cms.logshipper;
 
 import com.cms.logshipper.Config.MongoConfig;
-import com.cms.logshipper.Controllers.MainRunner;
-import com.cms.logshipper.Domain.MongoLog;
+import com.cms.logshipper.ElasticConnectors.MainRunner;
 import com.mongodb.Block;
 import com.mongodb.client.*;
 import com.mongodb.client.model.Aggregates;
@@ -16,24 +15,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-import java.util.Optional;
-
-import static com.mongodb.client.model.Filters.eq;
+import java.util.Collections;
+import java.util.HashMap;
 import static java.util.Arrays.asList;
-import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
-import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
 @SpringBootApplication
 public class LogshipperApplication implements CommandLineRunner {
 
-//    @Autowired
-//    LogRepository logRepository;
 
     private Logger logger = LoggerFactory.getLogger(MainRunner.class);
-
+    private MainRunner runner;
     private  MongoConfig mongoConfig;
-    public LogshipperApplication(MongoConfig mongoConfig) {
+
+    public LogshipperApplication(MongoConfig mongoConfig, MainRunner mainrunner) {
+        this.runner = mainrunner;
         this.mongoConfig = mongoConfig;
     }
 
@@ -50,11 +45,12 @@ public class LogshipperApplication implements CommandLineRunner {
 
         MongoClient client = mongoConfig.mongoClient();
         MongoDatabase database = client.getDatabase("test");
-        MongoCollection<MongoLog> collection = database.getCollection("logs", MongoLog.class);
+        MongoCollection<HashMap> collection = database.getCollection("logs", HashMap.class);
         collection
-                .watch(asList(Aggregates.match(Filters.in("operationType", asList("insert", "update", "replace", "delete")))))
+                .watch(Collections.singletonList(Aggregates.match(Filters.in("operationType", asList("insert", "update", "replace", "delete")))))
                 .fullDocument(FullDocument.DEFAULT)
-                .forEach( mongoLogChangeStreamDocument -> debug(mongoLogChangeStreamDocument) );
+                .forEach(this::debug);
+
 
 
     }
@@ -66,9 +62,18 @@ public class LogshipperApplication implements CommandLineRunner {
         }
     };
 
-    void debug(ChangeStreamDocument<MongoLog> log){
+    void debug(ChangeStreamDocument<HashMap> log){
         logger.info(" --- logging----");
+        assert log.getDocumentKey() != null;
         logger.info(String.valueOf(log.getDocumentKey().get("_id").asObjectId().getValue()));
+        HashMap lg = new HashMap<>();
+        try{
+            lg = log.getFullDocument();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        logger.info(" --- Calling Elastic server----");
+        this.runner.indexDocument(log.getFullDocument());
 
     }
 
