@@ -24,7 +24,7 @@ public class MongoConfig {
                 fromProviders(PojoCodecProvider.builder().automatic(true).build()));
 
         MongoClientSettings settings = MongoClientSettings.builder()
-                .codecRegistry(pojoCodecRegistry).applyConnectionString(new ConnectionString("mongodb+srv://admin:marper96@cluster0-dtohb.gcp.mongodb.net/test?retryWrites=true&w=majority"))
+                .codecRegistry(pojoCodecRegistry).applyConnectionString(new ConnectionString("mongodb+srv://<username>:<password>@cluster0-dtohb.gcp.mongodb.net/test?retryWrites=true&w=majority"))
                 .build();
         MongoClient client = MongoClients.create(settings);
         return client;
