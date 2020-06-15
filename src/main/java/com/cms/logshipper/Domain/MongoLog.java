@@ -7,23 +7,24 @@ import org.bson.types.ObjectId;
 public class MongoLog extends Document {
 
 
+    @BsonProperty(value = "_id")
     private ObjectId _id;
-//    @BsonProperty(value = "CLIENT_IP")
+    @BsonProperty(value = "CLIENT_IP")
     String CLIENT_IP;
-//    @BsonProperty(value = "REQUESTED_SERVISE")
+    @BsonProperty(value = "REQUESTED_SERVISE")
     String REQUESTED_SERVISE;
-//    @BsonProperty(value = "REQUEST_TYPE")
+    @BsonProperty(value = "REQUEST_TYPE")
     String REQUEST_TYPE;
 
-//    @BsonProperty(value = "AUTH_HEADER")
+    @BsonProperty(value = "AUTH_HEADER")
     String AUTH_HEADER;
 
-//    @BsonProperty(value = "PARAMETERS")
+    @BsonProperty(value = "PARAMETERS")
     String PARAMETERS;
-//    @BsonProperty(value = "TIMESTAMP")
+    @BsonProperty(value = "TIMESTAMP")
 
     String TIMESTAMP;
-//    @BsonProperty(value = "RESPONSE_CODE")
+    @BsonProperty(value = "RESPONSE_CODE")
 
     String RESPONSE_CODE;
 

@@ -2,8 +2,6 @@ package com.cms.logshipper;
 
 import com.cms.logshipper.Config.MongoConfig;
 import com.cms.logshipper.Controllers.MainRunner;
-import com.cms.logshipper.Dataacesss.LogRepository;
-import com.cms.logshipper.Domain.LogDocument;
 import com.cms.logshipper.Domain.MongoLog;
 import com.mongodb.Block;
 import com.mongodb.client.*;
@@ -13,10 +11,8 @@ import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import com.mongodb.client.model.changestream.FullDocument;
 import com.mongodb.internal.async.SingleResultCallback;
 import org.bson.Document;
-import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -31,8 +27,8 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 @SpringBootApplication
 public class LogshipperApplication implements CommandLineRunner {
 
-    @Autowired
-    LogRepository logRepository;
+//    @Autowired
+//    LogRepository logRepository;
 
     private Logger logger = LoggerFactory.getLogger(MainRunner.class);
 
@@ -73,15 +69,6 @@ public class LogshipperApplication implements CommandLineRunner {
     void debug(ChangeStreamDocument<MongoLog> log){
         logger.info(" --- logging----");
         logger.info(String.valueOf(log.getDocumentKey().get("_id").asObjectId().getValue()));
-        Optional<LogDocument> insertedLog = null;
-        try {
-            String id =String.valueOf(log.getDocumentKey().get("_id").asObjectId().getValue());
-            insertedLog = logRepository.findById(id);
-        }catch (Exception ee){
-            ee.printStackTrace();
-        }
-        LogDocument logdoc = insertedLog.get();
-        logger.info(" --- finished pipeline with"+logdoc.getCLIENT_IP());
 
     }
 
