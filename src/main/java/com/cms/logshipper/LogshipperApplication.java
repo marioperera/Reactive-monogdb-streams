@@ -15,9 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import java.util.Collections;
 import java.util.HashMap;
-import static java.util.Arrays.asList;
 
 @SpringBootApplication
 public class LogshipperApplication implements CommandLineRunner {
@@ -44,12 +42,17 @@ public class LogshipperApplication implements CommandLineRunner {
         logger.info("------------STARTING LOG-SHIPPER----------------");
 
         MongoClient client = mongoConfig.mongoClient();
-        MongoDatabase database = client.getDatabase("test");
-        MongoCollection<HashMap> collection = database.getCollection("logs", HashMap.class);
-        collection
-                .watch(Collections.singletonList(Aggregates.match(Filters.in("operationType", asList("insert", "update", "replace", "delete")))))
-                .fullDocument(FullDocument.DEFAULT)
-                .forEach(this::debug);
+        MongoDatabase database = client.getDatabase("epiccmsapi");
+        MongoCollection<HashMap> collection = database.getCollection("REQUESTLOG", HashMap.class);
+        try{
+            collection
+                    .watch()
+                    .fullDocument(FullDocument.DEFAULT)
+                    .forEach(this::debug);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
 
 
 
@@ -73,7 +76,10 @@ public class LogshipperApplication implements CommandLineRunner {
             e.printStackTrace();
         }
         logger.info(" --- Calling Elastic server----");
-        this.runner.indexDocument(log.getFullDocument());
+        HashMap<String, Object> doc = log.getFullDocument();
+        doc.put("UNIQUE_ID",String.valueOf(log.getDocumentKey().get("_id").asObjectId().getValue()));
+        logger.info(doc.toString());
+        this.runner.indexDocument(doc);
 
     }
 
